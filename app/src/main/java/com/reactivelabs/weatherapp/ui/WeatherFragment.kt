@@ -20,11 +20,20 @@ class WeatherFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val weather = arguments?.getString(SearchFragment.WEATHER_OVERALL)
+        cityTitle.text = arguments?.getString(SearchFragment.CITY)
+        title.text = weather
+        description.text = arguments?.getString(SearchFragment.WEATHER_DESCRIPTION)
+        temperature.text = "${arguments?.getDouble(SearchFragment.TEMP)}°C"
+        humidity.text = "${arguments?.getInt(SearchFragment.HUMIDITY)}%"
 
-        cityTitle.text = "Moscow"
-        title.text = "Clear"
-        description.text = "clear sky"
-        temperature.text = "42°"
-        humidity.text = "42%"
+        val drawable = resources.getDrawable(when(weather) {
+            "Clear" -> R.drawable.sunny
+            "Snow" -> R.drawable.snow
+            "Clouds" -> R.drawable.clouds
+            else -> R.drawable.default_photo
+        })
+
+        backgroundPicture.setImageDrawable(drawable)
     }
 }

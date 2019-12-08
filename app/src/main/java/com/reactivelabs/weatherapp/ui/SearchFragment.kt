@@ -18,6 +18,14 @@ class SearchFragment(
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 ) : Fragment(), CoroutineScope {
 
+    companion object {
+        const val CITY = "city"
+        const val WEATHER_OVERALL = "overall"
+        const val WEATHER_DESCRIPTION = "description"
+        const val HUMIDITY = "humidity"
+        const val TEMP = "temp"
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -33,16 +41,37 @@ class SearchFragment(
         startSearch.setOnClickListener {
             launch {
                 if (cityName.text.isNotBlank() && countryCode.text.isNotBlank()) {
+                    startSearch.visibility = View.INVISIBLE
+                    loader.visibility = View.VISIBLE
                     val cityName = cityName.text.toString()
                     val countryCode = countryCode.text.toString()
-                    val weather = repository.getCurrentWeatherForCity(cityName, countryCode).await()
-                    Log.i("SearchFragment", weather?.toString() ?: "Empty response")
+                    val weatherResponse = repository.getCurrentWeatherForCity(cityName, countryCode).await()
+                    Log.i("SearchFragment", weatherResponse?.toString() ?: "Empty response")
+                    weatherResponse?.apply {
+                        val weatherFragment = WeatherFragment()
+                        val data = Bundle().let {
+                            it.putString(CITY, name)
+                            it.putString(WEATHER_OVERALL, weather.first().main)
+                            it.putString(WEATHER_DESCRIPTION, weather.first().description)
+                            it.putDouble(TEMP, main.temp)
+                            it.putInt(HUMIDITY, main.humidity)
+                            it
+
+                        }
+
+                        weatherFragment.arguments = data
+
+                        fragmentManager?.beginTransaction()
+                            ?.replace(R.id.container, weatherFragment)
+                            ?.addToBackStack(null)
+                            ?.commit()
+                    }
+
+                    startSearch.visibility = View.VISIBLE
+                    loader.visibility = View.INVISIBLE
+
                 }
             }
-//            fragmentManager?.beginTransaction()
-//                ?.replace(R.id.container, WeatherFragment())
-//                ?.addToBackStack(null)
-//                ?.commit()
         }
     }
 }
