@@ -1,5 +1,7 @@
 package com.reactivelabs.weatherapp.data
 
+import android.util.Log
+import com.reactivelabs.weatherapp.WeatherApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -17,6 +19,16 @@ class WeatherRepository(
         .create(WeatherApi::class.java)
 
     fun getCurrentWeatherForCity(city: String, countryCode: String) = async {
-        api.getCurrentWeatherForCity("$city,$countryCode").execute().body()
+        val weather = api.getCurrentWeatherForCity("$city,$countryCode")
+            .execute()
+            .body()
+        WeatherApp.db
+            .weatherMainDao()
+            .insertAllWeatherMain(weather!!.main)
+        Log.i("DbTest", WeatherApp.db
+            .weatherMainDao()
+            .getAllWeatherMain()
+            .toString())
+        weather
     }
 }
